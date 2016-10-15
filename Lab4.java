@@ -16,12 +16,17 @@ public class Lab4 {
 	// Color sensor port connected to input S2
 	private static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
-	private static final Port usPort = LocalEV3.get().getPort("S1");		
-	private static final Port colorPort = LocalEV3.get().getPort("S2");		
+	private static final Port usPort = LocalEV3.get().getPort("S3");		
+	private static final Port colorPort = LocalEV3.get().getPort("S4");		
 
 	
 	public static void main(String[] args) {
-		
+		//For Testing the WheelRarius
+		Odometer odo = new Odometer(leftMotor, rightMotor, 30, true);
+		LCDInfo lcd = new LCDInfo(odo);
+		WidthTest test = new WidthTest(odo);
+		test.drive();
+		/*
 		//Setup ultrasonic sensor
 		// 1. Create a port object attached to a physical port (done above)
 		// 2. Create a sensor instance and attach to port
@@ -52,7 +57,7 @@ public class Lab4 {
 		// perform the light sensor localization
 		LightLocalizer lsl = new LightLocalizer(odo, colorValue, colorData);
 		lsl.doLocalization();			
-		
+		*/
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);	
 		
