@@ -21,12 +21,7 @@ public class Lab4 {
 
 	
 	public static void main(String[] args) {
-		//For Testing the WheelRarius
-		Odometer odo = new Odometer(leftMotor, rightMotor, 30, true);
-		LCDInfo lcd = new LCDInfo(odo);
-		WidthTest test = new WidthTest(odo);
-		test.drive();
-		/*
+
 		//Setup ultrasonic sensor
 		// 1. Create a port object attached to a physical port (done above)
 		// 2. Create a sensor instance and attach to port
@@ -46,9 +41,10 @@ public class Lab4 {
 		SampleProvider colorValue = colorSensor.getMode("Red");			// colorValue provides samples from this instance
 		float[] colorData = new float[colorValue.sampleSize()];			// colorData is the buffer in which data are returned
 				
-		// setup the odometer and display
+		// setup the odometer and display and navigation
 		Odometer odo = new Odometer(leftMotor, rightMotor, 30, true);
 		LCDInfo lcd = new LCDInfo(odo);
+		
 		
 		// perform the ultrasonic localization
 		USLocalizer usl = new USLocalizer(odo, usValue, usData, USLocalizer.LocalizationType.FALLING_EDGE);
@@ -57,7 +53,7 @@ public class Lab4 {
 		// perform the light sensor localization
 		LightLocalizer lsl = new LightLocalizer(odo, colorValue, colorData);
 		lsl.doLocalization();			
-		*/
+		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);	
 		
