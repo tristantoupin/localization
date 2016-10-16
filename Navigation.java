@@ -91,7 +91,7 @@ public class Navigation {
 	public void turnTo(double angle, boolean stop) {
 
 		double error = angle - this.odometer.getAng();
-
+		
 		while (Math.abs(error) > DEG_ERR) {
 
 			error = angle - this.odometer.getAng();
@@ -118,5 +118,25 @@ public class Navigation {
 	public void goForward(double distance) {
 		this.travelTo(Math.cos(Math.toRadians(this.odometer.getAng())) * distance, Math.cos(Math.toRadians(this.odometer.getAng())) * distance);
 
+	}
+	
+	public void turnTo(double theta){
+		leftMotor.setSpeed(SLOW);
+		rightMotor.setSpeed(SLOW);
+		//checks if angle is positive or negative and turns correctly
+		if(theta < 0) {
+			leftMotor.rotate(-convertAngle(odometer.getWheelRadius(), odometer.getWidth(), -(theta*180)/Math.PI), true);
+			rightMotor.rotate(convertAngle(odometer.getWheelRadius(), odometer.getWidth(), -(theta*180)/Math.PI), false);
+		}
+		else {
+			leftMotor.rotate(convertAngle(odometer.getWheelRadius(), odometer.getWidth(), (theta*180)/Math.PI), true);
+			rightMotor.rotate(-convertAngle(odometer.getWheelRadius(), odometer.getWidth(), (theta*180)/Math.PI), false);
+		}
+	}
+	private static int convertDistance(double radius, double distance) {
+		return (int) ((180.0 * distance) / (Math.PI * radius));
+	}
+	private static int convertAngle(double radius, double width, double angle) {
+		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 }
