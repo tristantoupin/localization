@@ -70,16 +70,13 @@ public class LightLocalizer {
 		/*(NOW WE ARE ABOVE THE CROSS)*/
 		int angleIndex = 0;
 		
-		leftMotor.setSpeed(ROTATION_SPEED);
-		rightMotor.setSpeed(ROTATION_SPEED);
+		leftMotor.setSpeed(120);
+		rightMotor.setSpeed(120);
 		leftMotor.backward();
 		rightMotor.forward();
 		while(angleIndex < 4){
 			this.colorSensor.fetchSample(colorData, 0);
 
-			/*
-			 * Upon reaching a black line, beep and record it.
-			 */
 			if( colorData[0] < 0.22){ //getColorData() - firstBrightness > 10){
 				angles[angleIndex] = odo.getAng();
 				angleIndex++;
@@ -93,18 +90,17 @@ public class LightLocalizer {
 	
 		//0th element = first y line, 1st = first x point, 3rd = second y, 4th = second x
 		//calculate the deltas.
-		double deltaY = angles[2] - angles[0];
-		double deltaX = angles[3] - angles[1];
+		double deltaY = angles[3] - angles[1];
+		double deltaX = angles[2] - angles[0];
 		// do trig to compute (0,0) and 0 degrees
 		double xValue = (-1)*lightSensorDistance*Math.cos(Math.PI*deltaX/(2*180));
 		double yValue = (-1)*lightSensorDistance*Math.cos(Math.PI*deltaY/(2*180));
 		nav.turnTo(0, true); //navi.turnTo(deltaTheta, true);
 		leftMotor.stop(true);
 		rightMotor.stop(true);
-		//System.out.println("I was off in x and y by (" + xValue + ", " + yValue + ")");
-		//set the position of the robot to where we are and an angle of 0.
+		
 		odo.setPosition(new double [] {xValue, yValue, 0}, new boolean [] {true, true, true});
-		//Sound.buzz();
+
 		//now travel to 0,0 and turn to 0 (we are done!)
 		nav.travelTo(0, 0);
 		leftMotor.stop(true);
@@ -112,6 +108,8 @@ public class LightLocalizer {
 		nav.turnTo(0, true);
 		leftMotor.stop(true);
 		rightMotor.stop(true);
+		odo.setPosition(new double [] {0, 0, 0}, new boolean [] {true, true, true});
+
 		
 	}
 		private float getColorData() {
