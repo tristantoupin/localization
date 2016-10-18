@@ -12,8 +12,6 @@ public class LightLocalizer {
 	private static final int ACCELERATION = 400;
 	private static double lightSensorDistance = 12.1;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
-	private SampleProvider usSensor;
-	private float[] usData;
 	private double[] angles;
 	private Navigation nav;
 	
@@ -21,10 +19,6 @@ public class LightLocalizer {
 		this.odo = odo;
 		this.colorSensor = colorSensor;
 		this.colorData = colorData;
-		this.leftMotor = leftMotor;
-		this.rightMotor = rightMotor;
-		this.usSensor = usSensor;
-		this.usData = usData;
 		
 		EV3LargeRegulatedMotor[] motors = this.odo.getMotors();
 		this.leftMotor = motors[0];
@@ -37,10 +31,7 @@ public class LightLocalizer {
 	}
 	
 	public void doLocalization() {
-		// drive to location listed in tutorial
-		// start rotating and clock all 4 gridlines
-		// do trig to compute (0,0) and 0 degrees
-		// when done travel to (0,0) and turn to 0 degrees
+
 		leftMotor.setSpeed(ROTATION_SPEED);
 		rightMotor.setSpeed(ROTATION_SPEED);
 		
@@ -50,9 +41,9 @@ public class LightLocalizer {
 		this.colorSensor.fetchSample(colorData, 0);
 		leftMotor.setSpeed(ROTATION_SPEED);
 		rightMotor.setSpeed(ROTATION_SPEED);
-
+		/*GO BACKward until it sees a black line*/
 		
-		while(colorData[0] > 0.22){
+		while(colorData[0] > 0.25){
 			leftMotor.backward();
 			rightMotor.backward();
 			this.colorSensor.fetchSample(colorData, 0);
@@ -62,7 +53,7 @@ public class LightLocalizer {
 		rightMotor.stop(true);
 		Sound.twoBeeps();
 		odo.setPosition(new double [] {-Math.cos(45)*lightSensorDistance, -Math.sin(45)*lightSensorDistance, 0}, new boolean [] {true, true, false});
-		
+		/*GO ABOVE THE CROSS*/
 		nav.travelTo(0.0,0.0);
 		leftMotor.stop(true);
 		rightMotor.stop(true);
@@ -74,13 +65,16 @@ public class LightLocalizer {
 		rightMotor.setSpeed(120);
 		leftMotor.backward();
 		rightMotor.forward();
+		
+		/*(GET 4 READINGS)*/
 		while(angleIndex < 4){
 			this.colorSensor.fetchSample(colorData, 0);
 
-			if( colorData[0] < 0.22){ //getColorData() - firstBrightness > 10){
+			if( colorData[0] < 0.25){
 				angles[angleIndex] = odo.getAng();
 				angleIndex++;
 				Sound.beep();
+				
 
 			}
 		}
@@ -88,21 +82,16 @@ public class LightLocalizer {
 		leftMotor.stop(true);
 		rightMotor.stop(true);
 	
-		//0th element = first y line, 1st = first x point, 3rd = second y, 4th = second x
-		//calculate the deltas.
 		double deltaY = angles[3] - angles[1];
 		double deltaX = angles[2] - angles[0];
-		// do trig to compute (0,0) and 0 degrees
-		double xValue = (-1)*lightSensorDistance*Math.cos(Math.PI*deltaX/(2*180));
-		double yValue = (-1)*lightSensorDistance*Math.cos(Math.PI*deltaY/(2*180));
-		nav.turnTo(0, true); //navi.turnTo(deltaTheta, true);
+		double newX = (-1)*lightSensorDistance*Math.cos(Math.PI*deltaX/(2*180));
+		double newY = (-1)*lightSensorDistance*Math.cos(Math.PI*deltaY/(2*180));
+		nav.turnTo(0, true);
 		leftMotor.stop(true);
 		rightMotor.stop(true);
 		
-		odo.setPosition(new double [] {xValue, yValue, 0}, new boolean [] {true, true, true});
-
-		//now travel to 0,0 and turn to 0 (we are done!)
-		nav.travelTo(0, 0);
+		odo.setPosition(new double [] {newX, newY, 0}, new boolean [] {true, true, true});
+		nav.travelTo(0,0);
 		leftMotor.stop(true);
 		rightMotor.stop(true);
 		nav.turnTo(0, true);
@@ -110,11 +99,5 @@ public class LightLocalizer {
 		rightMotor.stop(true);
 		odo.setPosition(new double [] {0, 0, 0}, new boolean [] {true, true, true});
 
-		
 	}
-		private float getColorData() {
-			this.colorSensor.fetchSample(colorData, 0);
-			return usData[0]*100;
-		}
-
 }

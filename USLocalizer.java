@@ -3,8 +3,6 @@ package localization;
 import lejos.hardware.Sound;
 import lejos.robotics.SampleProvider;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.sensor.EV3ColorSensor;
-
 
 public class USLocalizer {
 	public enum LocalizationType { FALLING_EDGE, RISING_EDGE };
@@ -14,10 +12,8 @@ public class USLocalizer {
 	
 	private Odometer odo;
 	private SampleProvider usSensor;
-	private static EV3ColorSensor colorSensor;
-	private static SampleProvider colorSample;
 
-	private float[] usData, colorData;
+	private float[] usData;
 	private LocalizationType locType;
 	private Navigation nav;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
@@ -39,9 +35,8 @@ public class USLocalizer {
 	}
 	
 	public void doLocalization() {
-		double [] pos = new double [3];
 		double angleA, angleB;
-		//set the rotational speed of the motors
+		//set motor speed
 		leftMotor.setSpeed(ROTATION_SPEED);
 		rightMotor.setSpeed(ROTATION_SPEED);
 		
@@ -89,10 +84,6 @@ public class USLocalizer {
 			
 			odo.setPosition(new double [] {0.0, 0.0, odo.getAng()+north}, new boolean [] {false, false, true});
 			nav.turnTo(0,true);	
-
-			// update the odometer position to 0 0 0 (that's how we are facing. Position (x and y) will
-			//be wrong but that will be fixed by the LightLocalizer
-			//odo.setPosition(new double [] {0.0, 0.0, 0}, new boolean [] {true, true, true});
 			
 	} else {
 		/*
@@ -150,12 +141,4 @@ public class USLocalizer {
 		usSensor.fetchSample(usData, 0);
 		return usData[0]*100;
 	}
-	
-	private static int convertDistance(double radius, double distance) {
-		return (int) ((180.0 * distance) / (Math.PI * radius));
-	}
-	private static int convertAngle(double radius, double width, double angle) {
-		return convertDistance(radius, Math.PI * width * angle / 360.0);
-	}
-
 }
