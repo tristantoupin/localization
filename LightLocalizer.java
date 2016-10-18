@@ -9,11 +9,12 @@ public class LightLocalizer {
 	private SampleProvider colorSensor;
 	private float[] colorData;	
 	private int ROTATION_SPEED = 80;
-	private static int ACCELERATION = 400;
+	private static final int ACCELERATION = 400;
+	private static double lightSensorDistance = 12.1;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
 	private SampleProvider usSensor;
 	private float[] usData;
-	private double angleA, angleB, angleC, angleD;
+	private double[] angles;
 	private Navigation nav;
 	
 	public LightLocalizer(Odometer odo, SampleProvider colorSensor, float[] colorData){ //, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, SampleProvider usSensor, float[] usData) {
@@ -30,7 +31,8 @@ public class LightLocalizer {
 		this.rightMotor = motors[1];
 		leftMotor.setAcceleration(ACCELERATION);
 		rightMotor.setAcceleration(ACCELERATION);
-		
+		angles = new double[4];
+
 		this.nav = new Navigation(odo);
 	}
 	
@@ -50,25 +52,70 @@ public class LightLocalizer {
 		rightMotor.setSpeed(ROTATION_SPEED);
 
 		
-		while(colorData[0] > 0.20){
-			this.colorSensor.fetchSample(colorData, 0);
+		while(colorData[0] > 0.22){
 			leftMotor.backward();
 			rightMotor.backward();
+			this.colorSensor.fetchSample(colorData, 0);
+
 		}
 		leftMotor.stop(true);
 		rightMotor.stop(true);
 		Sound.twoBeeps();
-		odo.setPosition(new double [] {-Math.cos(45)*12.1, -Math.sin(45)*12.1, 0}, new boolean [] {true, true, false});
+		odo.setPosition(new double [] {-Math.cos(45)*lightSensorDistance, -Math.sin(45)*lightSensorDistance, 0}, new boolean [] {true, true, false});
 		
 		nav.travelTo(0.0,0.0);
 		leftMotor.stop(true);
 		rightMotor.stop(true);
 		
+		/*(NOW WE ARE ABOVE THE CROSS)*/
+		int angleIndex = 0;
 		
+		leftMotor.setSpeed(ROTATION_SPEED);
+		rightMotor.setSpeed(ROTATION_SPEED);
+		leftMotor.backward();
+		rightMotor.forward();
+		while(angleIndex < 4){
+			this.colorSensor.fetchSample(colorData, 0);
+
+			/*
+			 * Upon reaching a black line, beep and record it.
+			 */
+			if( colorData[0] < 0.22){ //getColorData() - firstBrightness > 10){
+				angles[angleIndex] = odo.getAng();
+				angleIndex++;
+				Sound.beep();
+
+			}
+		}
+		
+		leftMotor.stop(true);
+		rightMotor.stop(true);
+	
+		//0th element = first y line, 1st = first x point, 3rd = second y, 4th = second x
+		//calculate the deltas.
+		double deltaY = angles[2] - angles[0];
+		double deltaX = angles[3] - angles[1];
+		// do trig to compute (0,0) and 0 degrees
+		double xValue = (-1)*lightSensorDistance*Math.cos(Math.PI*deltaX/(2*180));
+		double yValue = (-1)*lightSensorDistance*Math.cos(Math.PI*deltaY/(2*180));
+		nav.turnTo(0, true); //navi.turnTo(deltaTheta, true);
+		leftMotor.stop(true);
+		rightMotor.stop(true);
+		//System.out.println("I was off in x and y by (" + xValue + ", " + yValue + ")");
+		//set the position of the robot to where we are and an angle of 0.
+		odo.setPosition(new double [] {xValue, yValue, 0}, new boolean [] {true, true, true});
+		//Sound.buzz();
+		//now travel to 0,0 and turn to 0 (we are done!)
+		nav.travelTo(0, 0);
+		leftMotor.stop(true);
+		rightMotor.stop(true);
+		nav.turnTo(0, true);
+		leftMotor.stop(true);
+		rightMotor.stop(true);
 		
 	}
-		private float getFilteredData() {
-			usSensor.fetchSample(usData, 0);
+		private float getColorData() {
+			this.colorSensor.fetchSample(colorData, 0);
 			return usData[0]*100;
 		}
 
