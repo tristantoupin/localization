@@ -79,7 +79,7 @@ public class Navigation {
 			if (minAng < 0)
 				minAng += 360.0;
 			this.turnTo(minAng, false);
-			this.setSpeeds(FAST, FAST);
+			this.setSpeeds(SLOW, SLOW);
 		}
 		this.setSpeeds(0, 0);
 	}
@@ -117,7 +117,6 @@ public class Navigation {
 	 */
 	public void goForward(double distance) {
 		this.travelTo(Math.cos(Math.toRadians(this.odometer.getAng())) * distance, Math.cos(Math.toRadians(this.odometer.getAng())) * distance);
-
 	}
 	
 	public void turnTo(double theta){
